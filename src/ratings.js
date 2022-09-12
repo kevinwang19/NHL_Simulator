@@ -47,7 +47,7 @@ async function leagueRatings() {
         teamDetails[teamKeys[teamKeyIndex]] = team;
         teamKeyIndex ++;
         result = await dbo.collection(team).find({}).toArray();
-        
+
         for (const player of result) {
             playersDetails = {};
             playerKeyIndex = 0;
@@ -70,9 +70,9 @@ async function leagueRatings() {
                     Number(playerStats.SVPer)*300 -
                     Number(playerStats.GAA)*100 + 
                     Number(playerStats.SO)*15 + 
-                    Number(playerStats.QS)*5 -
+                    Number(playerStats.QS)*20 -
                     Number(playerStats.RBS)*5 + 
-                    Number(playerStats.GSAA)*3 + 1000
+                    Number(playerStats.GSAA)*3 + 700
 
                     playersDetails[playerKeys[playerKeyIndex]] = "";
                     playerKeyIndex ++;
@@ -81,52 +81,75 @@ async function leagueRatings() {
                     playersDetails[playerKeys[playerKeyIndex]] = goaltendingRating.toString();
             }
             else {
-                offensiveRating = ((Number(playerStats.EVG)*1.3 + Number(playerStats.EVA))*2/Number(playerStats.GP) + 
-                    (Number(playerStats.PPG)*1.3 + Number(playerStats.PPA))*4/Number(playerStats.GP) +
-                    Number(playerStats.TSA)*2/Number(playerStats.TOI) +
-                    Number(playerStats.PlusMinus)*0.5/Number(playerStats.GP) + 
-                    Number(playerStats.GWG)*5/Number(playerStats.GP) + 7.5)*100
+                if (playerStats.Pos == "L" || playerStats.Pos == "R") {
+                    offensiveRating = ((Number(playerStats.EVG)*1.3 + Number(playerStats.EVA))*2/Number(playerStats.GP) + 
+                        (Number(playerStats.PPG)*1.3 + Number(playerStats.PPA))*4/Number(playerStats.GP) +
+                        Number(playerStats.TSA)*2/Number(playerStats.TOI) +
+                        Number(playerStats.PlusMinus)*0.5/Number(playerStats.GP) + 
+                        Number(playerStats.GWG)*5/Number(playerStats.GP) + 
+                        (Number(playerStats.TOI)/Number(playerStats.GP)/7) + 6.0)*100
 
                     playersDetails[playerKeys[playerKeyIndex]] = offensiveRating.toString();
                     playerKeyIndex ++;
 
-                if (playerStats.Pos == "L" || playerStats.Pos == "R" || playerStats.Pos == "W" || playerStats.Pos == "") {
                     defensiveRating = (Number(playerStats.BLK)*2/Number(playerStats.GP) +
                         (Number(playerStats.TK) - Number(playerStats.GV))/Number(playerStats.GP) -
                         Number(playerStats.PIM)*20/Number(playerStats.TOI) +
                         Number(playerStats.PlusMinus)*2/Number(playerStats.GP) + 
                         Number(playerStats.HIT)*0.1/Number(playerStats.GP) + 
-                        (Number(playerStats.SHG) + Number(playerStats.SHA))*10/Number(playerStats.GP) + 6.5)*100
+                        (Number(playerStats.SHG) + Number(playerStats.SHA))*10/Number(playerStats.GP) + 7.0)*100
 
-                        playersDetails[playerKeys[playerKeyIndex]] = defensiveRating.toString();
-                        playerKeyIndex ++;
-                        playersDetails[playerKeys[playerKeyIndex]] = "";
+                    playersDetails[playerKeys[playerKeyIndex]] = defensiveRating.toString();
+                    playerKeyIndex ++;
+                    playersDetails[playerKeys[playerKeyIndex]] = "";
                 }
                 else if (playerStats.Pos == "D") {
+                    offensiveRating = ((Number(playerStats.EVG)*1.3 + Number(playerStats.EVA))*2/Number(playerStats.GP) + 
+                        (Number(playerStats.PPG)*1.3 + Number(playerStats.PPA))*4/Number(playerStats.GP) +
+                        Number(playerStats.TSA)*2/Number(playerStats.TOI) +
+                        Number(playerStats.PlusMinus)*0.5/Number(playerStats.GP) + 
+                        Number(playerStats.GWG)*5/Number(playerStats.GP) + 
+                        (Number(playerStats.TOI)/Number(playerStats.GP)/7) + 4.0)*100
+
+                    playersDetails[playerKeys[playerKeyIndex]] = offensiveRating.toString();
+                    playerKeyIndex ++;
+
                     defensiveRating = (Number(playerStats.BLK)*2/Number(playerStats.GP) +
                         (Number(playerStats.TK) - Number(playerStats.GV))/Number(playerStats.GP) -
                         Number(playerStats.PIM)*20/Number(playerStats.TOI) +
                         Number(playerStats.PlusMinus)*2/Number(playerStats.GP) + 
                         Number(playerStats.HIT)*0.1/Number(playerStats.GP) + 
-                        (Number(playerStats.SHG) + Number(playerStats.SHA))*10/Number(playerStats.GP) + 7.5)*100
+                        (Number(playerStats.SHG) + Number(playerStats.SHA))*10/Number(playerStats.GP) +
+                        (Number(playerStats.TOI)/Number(playerStats.GP)/4) + 2.0)*100
 
-                        playersDetails[playerKeys[playerKeyIndex]] = defensiveRating.toString();
-                        playerKeyIndex ++;
-                        playersDetails[playerKeys[playerKeyIndex]] = "";
+                    playersDetails[playerKeys[playerKeyIndex]] = defensiveRating.toString();
+                    playerKeyIndex ++;
+                    playersDetails[playerKeys[playerKeyIndex]] = "";
                 }
                 else {
+                    offensiveRating = ((Number(playerStats.EVG)*1.3 + Number(playerStats.EVA))*2/Number(playerStats.GP) + 
+                        (Number(playerStats.PPG)*1.3 + Number(playerStats.PPA))*4/Number(playerStats.GP) +
+                        Number(playerStats.TSA)*2/Number(playerStats.TOI) +
+                        Number(playerStats.PlusMinus)*0.5/Number(playerStats.GP) + 
+                        Number(playerStats.GWG)*5/Number(playerStats.GP) + 
+                        (Number(playerStats.TOI)/Number(playerStats.GP)/7) + 6.0)*100
+
+                    playersDetails[playerKeys[playerKeyIndex]] = offensiveRating.toString();
+                    playerKeyIndex ++;
+
                     defensiveRating = (Number(playerStats.BLK)*2/Number(playerStats.GP) +
                         (Number(playerStats.TK) - Number(playerStats.GV))/Number(playerStats.GP) -
                         Number(playerStats.PIM)*20/Number(playerStats.TOI) +
                         Number(playerStats.PlusMinus)*2/Number(playerStats.GP) + 
                         Number(playerStats.HIT)*0.1/Number(playerStats.GP) + 
                         (Number(playerStats.SHG) + Number(playerStats.SHA))*10/Number(playerStats.GP) + 
-                        Number(playerStats.FOPer)/20 + 5.0)*100
+                        Number(playerStats.FOPer)/20 + 
+                        Number(playerStats.FOW)/Number(playerStats.GP)/15 + 5.0)*100
 
-                        playersDetails[playerKeys[playerKeyIndex]] = defensiveRating.toString();
-                        playerKeyIndex ++;
-                        playersDetails[playerKeys[playerKeyIndex]] = "";
-                        }
+                    playersDetails[playerKeys[playerKeyIndex]] = defensiveRating.toString();
+                    playerKeyIndex ++;
+                    playersDetails[playerKeys[playerKeyIndex]] = "";
+                }
             }
             statsArray.push(playersDetails)
         }
@@ -143,4 +166,4 @@ leagueRatings().then(function(result) {
     //console.log(result[27]);
 })
 
-module.exports = {leagueRatings };
+module.exports = { leagueRatings };
